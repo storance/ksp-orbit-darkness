@@ -1,0 +1,102 @@
+<div class="container">
+    <form class="form-horizontal">
+        <fieldset>
+            <legend>Satellite Deployment</legend>
+            <div class="form-group">
+                <label for="config" class="control-label col-sm-3">TACLS Config</label>
+                <div class="col-sm-3">
+                    <select id="config" name="config" class="form-control" ng-model="config">
+                        <option value="stock">Stock</option>
+                        <option value="realism-overhaul">Realism Overhaul</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" ng-class="{'has-error' : errors.duration}">
+                <label for="duration" class="control-label col-sm-3">Mission Duration</label>
+                <div class="col-sm-6">
+                    <div class="row">
+                        <span class="col-sm-12 help-block" ng-show="errors.duration">{{errors.duration}}</span>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" id="durationDays" name="durationDays" ng-model="durationDays" class="form-control" />
+                                <div class="input-group-addon">d</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" id="durationHours" name="durationHours" ng-model="durationHours" class="form-control" />
+                                <div class="input-group-addon">h</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" id="durationMinutes" name="durationMinutes" ng-model="durationMinutes" class="form-control" />
+                                <div class="input-group-addon">m</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" id="durationSeconds" name="durationSeconds" ng-model="durationSeconds" class="form-control" />
+                                <div class="input-group-addon">s</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" ng-class="{'has-error' : errors.crewCount}">
+                <label for="crewCount" class="control-label col-sm-3"># of Crew</label>
+                <div class="col-sm-6">
+                    <span class="help-block" ng-show="errors.crewCount">{{errors.crewCount}}</span>
+                    <div class="input-group">
+                        <input type="text" id="crewCount" name="crewCount" ng-model="crewCount" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-offset-3">
+                <button type="submit" class="btn btn-default" ng-click="calculate()">Calculate</button>
+            </div>
+            <div class="form-group" ng-show="food">
+                <label class="col-sm-3 control-label">Food</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{food}}</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="water">
+                <label class="col-sm-3 control-label">Water</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{water}}</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="oxygen">
+                <label class="col-sm-3 control-label">Oxygen</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{oxygen}}</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="waste">
+                <label class="col-sm-3 control-label">Waste</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{waste}}</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="wasteWater">
+                <label class="col-sm-3 control-label">Waste Water</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{wasteWater}}</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="co2">
+                <label class="col-sm-3 control-label">CO<sub>2</sub></label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{co2}}</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="energy">
+                <label class="col-sm-3 control-label">Energy Use</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{totalEnergy}} e ({{energy}} e/s)</p>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
