@@ -365,6 +365,47 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         $scope.energy = Math.round(exactEnergy * 100) / 100;
         $scope.totalEnergy = Math.round(exactEnergy * duration);
     };
+
+    function validate() {
+        if ($scope.crewCount === "") {
+            $scope.errors.crewCount = "Please enter an crew count.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.crewCount) || $scope.crewCount < 1) {
+            $scope.errors.crewCount = "Please enter a valid number greater than or equal to 1.";
+            valid = false;
+        } else {
+            $scope.errors.crewCount = "";
+        }
+
+        $scope.errors.duration = [];
+        if (!isPositiveNumber($scope.durationDays)) {
+            $scope.errors.duration.push("Please enter days component greater than or equal to 0.");
+            valid = false;
+        }
+
+        if (!isPositiveNumber($scope.durationHours)) {
+            $scope.errors.duration.push("Please enter hours component greater than or equal to 0.");
+            valid = false;
+        }
+
+        if (!isPositiveNumber($scope.durationMinutes)) {
+            $scope.errors.duration.push("Please enter minutes component greater than or equal to 0.");
+            valid = false;
+        }
+
+        if (!isPositiveNumber($scope.durationSeconds)) {
+            $scope.errors.duration.push("Please enter seconds component greater than or equal to 0.");
+            valid = false;
+        }
+
+        if (!$scope.errors.duration && $scope.durationDays === '0' && $scope.durationHours === '0' 
+            && $scope.durationMinutes === '0' && $scope.durationSeconds === '0') {
+            $scope.errors.duration.push("Please enter a duration greater then 0.");
+            valid = false;
+        }
+
+        return $valid;
+    }
 });
 
 function humanizeSeconds(seconds) {
