@@ -11,30 +11,38 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group" ng-class="{'has-error' : errors.duration}">
+            <div class="form-group" ng-class="{'has-error' : errors.duration &amp;&amp;errors.duration.length > 0}">
                 <label for="duration" class="control-label col-sm-3">Mission Duration</label>
-                <div class="col-sm-6">
+                <div class="col-sm-8">
                     <div class="row">
-                        <span class="col-sm-12 help-block" ng-show="errors.duration">{{errors.duration}}</span>
-                        <div class="col-sm-3">
+                        <span class="col-sm-12 help-block" ng-show="errors.duration &amp;&amp;errors.duration.length > 0">
+                            <ul><li ng-repeat="error in errors.duration">{{error}}</li></ul>
+                        </span>
+                        <div class="col-sm-2">
+                            <div class="input-group">
+                                <input type="text" id="durationYears" name="durationYears" ng-model="durationYears" class="form-control" />
+                                <div class="input-group-addon">y</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
                             <div class="input-group">
                                 <input type="text" id="durationDays" name="durationDays" ng-model="durationDays" class="form-control" />
                                 <div class="input-group-addon">d</div>
                             </div>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-2">
                             <div class="input-group">
                                 <input type="text" id="durationHours" name="durationHours" ng-model="durationHours" class="form-control" />
                                 <div class="input-group-addon">h</div>
                             </div>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-2">
                             <div class="input-group">
                                 <input type="text" id="durationMinutes" name="durationMinutes" ng-model="durationMinutes" class="form-control" />
                                 <div class="input-group-addon">m</div>
                             </div>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-2">
                             <div class="input-group">
                                 <input type="text" id="durationSeconds" name="durationSeconds" ng-model="durationSeconds" class="form-control" />
                                 <div class="input-group-addon">s</div>
@@ -55,46 +63,54 @@
             <div class="col-sm-offset-3">
                 <button type="submit" class="btn btn-default" ng-click="calculate()">Calculate</button>
             </div>
-            <div class="form-group" ng-show="food">
-                <label class="col-sm-3 control-label">Food</label>
-                <div class="col-sm-3">
-                    <p class="form-control-static">{{food}}</p>
+            <div ng-show="results">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Food</label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.food}}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group" ng-show="water">
-                <label class="col-sm-3 control-label">Water</label>
-                <div class="col-sm-3">
-                    <p class="form-control-static">{{water}}</p>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Water</label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.water}}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group" ng-show="oxygen">
-                <label class="col-sm-3 control-label">Oxygen</label>
-                <div class="col-sm-3">
-                    <p class="form-control-static">{{oxygen}}</p>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Oxygen</label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.oxygen}}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group" ng-show="waste">
-                <label class="col-sm-3 control-label">Waste</label>
-                <div class="col-sm-3">
-                    <p class="form-control-static">{{waste}}</p>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Waste</label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.waste}}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group" ng-show="wasteWater">
-                <label class="col-sm-3 control-label">Waste Water</label>
-                <div class="col-sm-3">
-                    <p class="form-control-static">{{wasteWater}}</p>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Waste Water</label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.wasteWater}}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group" ng-show="co2">
-                <label class="col-sm-3 control-label">CO<sub>2</sub></label>
-                <div class="col-sm-3">
-                    <p class="form-control-static">{{co2}}</p>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">CO<sub>2</sub></label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.co2}}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group" ng-show="energy">
-                <label class="col-sm-3 control-label">Energy Use</label>
-                <div class="col-sm-3">
-                    <p class="form-control-static">{{totalEnergy}}e ({{energy}}e/s)</p>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Energy Use</label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.totalEnergy}}e ({{results.energy}}e/s)</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">MFT Tank Volume</label>
+                    <div class="col-sm-3">
+                        <p class="form-control-static">{{results.liters}}L</p>
+                    </div>
                 </div>
             </div>
         </fieldset>
