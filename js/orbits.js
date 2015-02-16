@@ -1,4 +1,8 @@
 var bodies = {
+    "kerbol" : {
+        "radius" : 261600000,
+        "mu" : 1.1723328e18
+    },
     "moho" : {
         "radius" : 250000,
         "mu" : 1.6860938e11

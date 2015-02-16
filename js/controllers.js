@@ -336,37 +336,55 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         }
     };
 
+    var literRatio = {
+        'food' : 1,
+        'water' : 1,
+        'oxygen' : 221.1347,
+        'waste' : 1,
+        'wasteWater' : 1,
+        'co2' : 476.2173
+    };
+
     $scope.config = 'stock';
+    $scope.durationYears = 0;
     $scope.durationDays = 0;
     $scope.durationHours = 0;
     $scope.durationMinutes = 0;
     $scope.durationSeconds = 0;
     $scope.crewCount = 1;
-    $scope.food = '';
-    $scope.water = '';
-    $scope.oxygen = '';
-    $scope.waste = '';
-    $scope.wasteWater = '';
-    $scope.co2 = '';
-    $scope.energy = '';
+    $scope.results = null;
+    $scope.errors = {};
 
     $scope.calculate = function() {
+        if (!validate()) {
+            return;
+        }
+
         var config = configs[$scope.config],
-            duration = (parseFloat($scope.durationDays) * 21600) + (parseFloat($scope.durationHours) * 3600) +
-                       (parseFloat($scope.durationMinutes) * 60) + parseFloat($scope.durationSeconds),
+            duration = $scope.getDurationInSeconds(),
             exactEnergy = config.baseEnergyConsumption + (config.energyConsumptionPerCrew * $scope.crewCount);
 
-        $scope.food = Math.round(config.foodConsumptionRate * duration * $scope.crewCount * 1000) / 1000;
-        $scope.water = Math.round(config.waterConsumptionRate * duration * $scope.crewCount * 1000) / 1000;
-        $scope.oxygen = Math.round(config.oxygenConsumptionRate * duration * $scope.crewCount * 10) / 10;
-        $scope.waste = Math.round(config.wasteProductionRate * duration * $scope.crewCount * 1000) / 1000;
-        $scope.wasteWater = Math.round(config.wasteWaterProductionRate * duration * $scope.crewCount * 1000) / 1000;
-        $scope.co2 = Math.round(config.co2ProductionRate * duration * $scope.crewCount * 10) / 10;
-        $scope.energy = Math.round(exactEnergy * 100) / 100;
-        $scope.totalEnergy = Math.round(exactEnergy * duration);
+        $scope.results = {
+            food:        Math.round(config.foodConsumptionRate * duration * $scope.crewCount * 1000) / 1000,
+            water:       Math.round(config.waterConsumptionRate * duration * $scope.crewCount * 1000) / 1000,
+            oxygen:      Math.round(config.oxygenConsumptionRate * duration * $scope.crewCount * 10) / 10,
+            waste:       Math.round(config.wasteProductionRate * duration * $scope.crewCount * 1000) / 1000,
+            wasteWater:  Math.round(config.wasteWaterProductionRate * duration * $scope.crewCount * 1000) / 1000,
+            co2:         Math.round(config.co2ProductionRate * duration * $scope.crewCount * 10) / 10,
+            energy:      Math.round(exactEnergy * 100) / 100,
+            totalEnergy: Math.round(exactEnergy * duration),
+        };
+        $scope.results.liters = ($scope.results.food / literRatio.food) +
+                                ($scope.results.water / literRatio.water) +
+                                ($scope.results.oxygen / literRatio.oxygen) +
+                                ($scope.results.waste / literRatio.waste) +
+                                ($scope.results.wasteWater / literRatio.wasteWater) +
+                                ($scope.results.co2 / literRatio.co2);
     };
 
     function validate() {
+        var valid = true;
+
         if ($scope.crewCount === "") {
             $scope.errors.crewCount = "Please enter an crew count.";
             valid = false;
@@ -378,38 +396,53 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         }
 
         $scope.errors.duration = [];
+        if (!isPositiveNumber($scope.durationYears)) {
+            $scope.errors.duration.push("Please enter a years component greater than or equal to 0.");
+            valid = false;
+        }
+
         if (!isPositiveNumber($scope.durationDays)) {
-            $scope.errors.duration.push("Please enter days component greater than or equal to 0.");
+            $scope.errors.duration.push("Please enter a days component greater than or equal to 0.");
             valid = false;
         }
 
         if (!isPositiveNumber($scope.durationHours)) {
-            $scope.errors.duration.push("Please enter hours component greater than or equal to 0.");
+            $scope.errors.duration.push("Please enter a hours component greater than or equal to 0.");
             valid = false;
         }
 
         if (!isPositiveNumber($scope.durationMinutes)) {
-            $scope.errors.duration.push("Please enter minutes component greater than or equal to 0.");
+            $scope.errors.duration.push("Please enter a minutes component greater than or equal to 0.");
             valid = false;
         }
 
         if (!isPositiveNumber($scope.durationSeconds)) {
-            $scope.errors.duration.push("Please enter seconds component greater than or equal to 0.");
+            $scope.errors.duration.push("Please enter a seconds component greater than or equal to 0.");
             valid = false;
         }
 
-        if (!$scope.errors.duration && $scope.durationDays === '0' && $scope.durationHours === '0' 
-            && $scope.durationMinutes === '0' && $scope.durationSeconds === '0') {
+        if ($scope.errors.duration.length === 0 && $scope.getDurationInSeconds() === 0) {
             $scope.errors.duration.push("Please enter a duration greater then 0.");
             valid = false;
         }
 
-        return $valid;
+        return valid;
     }
+
+    $scope.getDurationInSeconds = function() {
+        var durationYears = parseFloat($scope.durationYears),
+            durationDays = parseFloat($scope.durationDays),
+            durationHours = parseFloat($scope.durationHours),
+            durationMinutes = parseFloat($scope.durationMinutes),
+            durationSeconds = parseFloat($scope.durationSeconds);
+
+        return (durationYears * 426 * 21600) + (durationDays * 21600) + (durationHours * 3600) + (durationMinutes * 60) + durationSeconds;
+    };
 });
 
 function humanizeSeconds(seconds) {
-    var days = 0,
+    var years = 0,
+        days = 0,
         hours = 0,
         minutes = 0;
 
@@ -423,23 +456,31 @@ function humanizeSeconds(seconds) {
         minutes = minutes % 60;
     }
 
-    // todo - custom day length
     if (hours > 6) {
         days = Math.floor(hours / 6);
         hours = hours % 6;
     }
 
+    if (days > 426) {
+        years = Math.floor(days / 426);
+        days = days % 426;
+    }
+
     var humanizedText = seconds + "s";
-    if (minutes > 0 || hours > 0 || days > 0) {
+    if (minutes > 0 || hours > 0 || days > 0 || years > 0) {
         humanizedText = minutes + "m " + humanizedText;
     }
 
-    if (hours > 0 || days > 0) {
+    if (hours > 0 || days > 0 || years > 0) {
         humanizedText = hours + "h " + humanizedText;
     }
 
-    if (days > 0 ){
+    if (days > 0 || years > 0) {
         humanizedText = days + "d " + humanizedText;
+    }
+
+    if (years > 0) {
+        humanizedText = years + "y " + humanizedText;
     }
 
     return humanizedText;

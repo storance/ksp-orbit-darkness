@@ -40,10 +40,17 @@ module.exports = function(grunt) {
         },
         jshint: {
             all: ['js**/*.js']
+        },
+        connect: {
+            server: {
+                port: 8000,
+                keepalive: true
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
