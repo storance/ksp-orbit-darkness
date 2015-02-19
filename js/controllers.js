@@ -146,23 +146,23 @@ kspToolsControllers.controller('OrbitInfoCtrl', function ($scope) {
         }
 
         if ($scope.mode === 'pe+period') {
-            $scope.apoapsisCalc = Math.round(convertAltitude(orbit.apoapsis, 'm', $scope.periapsisUnits) * 1000) / 1000;
+            $scope.apoapsisCalc = round(convertAltitude(orbit.apoapsis, 'm', $scope.periapsisUnits), 3);
         } else {
             $scope.apoapsisCalc = '';
         }
 
         if ($scope.mode === 'ap+period') {
-            $scope.periapsisCalc = Math.round(convertAltitude(orbit.periapsis, 'm', $scope.apoapsisUnits) * 1000) / 1000;
+            $scope.periapsisCalc = round(convertAltitude(orbit.periapsis, 'm', $scope.apoapsisUnits), 3);
         } else {
             $scope.periapsisCalc = '';
         }
-        $scope.semiMajorAxis = Math.round(orbit.semiMajorAxis);
-        $scope.semiMinorAxis = Math.round(orbit.semiMinorAxis);
-        $scope.eccentricity = Math.round(orbit.eccentricity * 1000) / 1000;
-        $scope.apoapsisVelocity = Math.round(orbit.apoapsisVelocity * 10) / 10;
-        $scope.periapsisVelocity = Math.round(orbit.periapsisVelocity * 10) / 10;
+        $scope.semiMajorAxis = round(orbit.semiMajorAxis);
+        $scope.semiMinorAxis = round(orbit.semiMinorAxis);
+        $scope.eccentricity = round(orbit.eccentricity, 3);
+        $scope.apoapsisVelocity = round(orbit.apoapsisVelocity, 1);
+        $scope.periapsisVelocity = round(orbit.periapsisVelocity, 1);
         if ($scope.mode === 'ap+pe') {
-            $scope.periodCalc = Math.round(orbit.period * 1000) / 1000;
+            $scope.periodCalc = round(orbit.period, 3);
             $scope.periodHumanized = humanizeSeconds(orbit.period);
         } else {
             $scope.periodCalc = '';
@@ -261,8 +261,8 @@ kspToolsControllers.controller('SatelliteCtrl', function ($scope) {
         console.log(parkingOrbit);
         console.log(desiredPeriod);
 
-        $scope.periapsisCalc = Math.round(convertAltitude(parkingOrbit.periapsis, 'm', $scope.apoapsisUnits) * 1000) / 1000;
-        $scope.periodCalc = Math.round(parkingOrbit.period * 1000) / 1000;
+        $scope.periapsisCalc = round(convertAltitude(parkingOrbit.periapsis, 'm', $scope.apoapsisUnits), 3);
+        $scope.periodCalc = round(parkingOrbit.period, 3);
         $scope.periodHumanized = humanizeSeconds(parkingOrbit.period);
     };
 
@@ -336,7 +336,7 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         }
     };
 
-    var literRatio = {
+    var utilization = {
         'food' : 1,
         'water' : 1,
         'oxygen' : 221.1347,
@@ -352,11 +352,14 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
     $scope.durationMinutes = 0;
     $scope.durationSeconds = 0;
     $scope.crewCount = 1;
-    $scope.results = null;
+    $scope.tankVolume = '';
+    $scope.tankType = 'both';
+    $scope.tripResults = null;
+    $scope.mftResults = null;
     $scope.errors = {};
 
-    $scope.calculate = function() {
-        if (!validate()) {
+    $scope.calculateTrip = function() {
+        if (!validateTrip()) {
             return;
         }
 
@@ -364,25 +367,66 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
             duration = $scope.getDurationInSeconds(),
             exactEnergy = config.baseEnergyConsumption + (config.energyConsumptionPerCrew * $scope.crewCount);
 
-        $scope.results = {
-            food:        Math.round(config.foodConsumptionRate * duration * $scope.crewCount * 1000) / 1000,
-            water:       Math.round(config.waterConsumptionRate * duration * $scope.crewCount * 1000) / 1000,
-            oxygen:      Math.round(config.oxygenConsumptionRate * duration * $scope.crewCount * 10) / 10,
-            waste:       Math.round(config.wasteProductionRate * duration * $scope.crewCount * 1000) / 1000,
-            wasteWater:  Math.round(config.wasteWaterProductionRate * duration * $scope.crewCount * 1000) / 1000,
-            co2:         Math.round(config.co2ProductionRate * duration * $scope.crewCount * 10) / 10,
-            energy:      Math.round(exactEnergy * 100) / 100,
-            totalEnergy: Math.round(exactEnergy * duration),
+        $scope.tripResults = {
+            food:        round(config.foodConsumptionRate * duration * $scope.crewCount, 3),
+            water:       round(config.waterConsumptionRate * duration * $scope.crewCount, 3),
+            oxygen:      round(config.oxygenConsumptionRate * duration * $scope.crewCount, 1),
+            waste:       round(config.wasteProductionRate * duration * $scope.crewCount, 3),
+            wasteWater:  round(config.wasteWaterProductionRate * duration * $scope.crewCount, 3),
+            co2:         round(config.co2ProductionRate * duration * $scope.crewCount, 1),
+            energy:      round(exactEnergy, 2),
+            totalEnergy: round(exactEnergy * duration),
         };
-        $scope.results.liters = ($scope.results.food / literRatio.food) +
-                                ($scope.results.water / literRatio.water) +
-                                ($scope.results.oxygen / literRatio.oxygen) +
-                                ($scope.results.waste / literRatio.waste) +
-                                ($scope.results.wasteWater / literRatio.wasteWater) +
-                                ($scope.results.co2 / literRatio.co2);
+        $scope.tripResults.liters = ($scope.tripResults.food / utilization.food) +
+                                ($scope.tripResults.water / utilization.water) +
+                                ($scope.tripResults.oxygen / utilization.oxygen) +
+                                ($scope.tripResults.waste / utilization.waste) +
+                                ($scope.tripResults.wasteWater / utilization.wasteWater) +
+                                ($scope.tripResults.co2 / utilization.co2);
     };
 
-    function validate() {
+    $scope.calculateMFT = function() {
+        if (!validateMFT()) {
+            return;
+        }
+
+        var config = configs[$scope.config],
+            total = 0;
+
+        if ($scope.tankType === 'both' || $scope.tankType === 'supplies') {
+            total += (config.foodConsumptionRate / utilization.food) +
+                     (config.waterConsumptionRate / utilization.water) +
+                     (config.oxygenConsumptionRate / utilization.oxygen);
+        }
+
+        if ($scope.tankType === 'both' || $scope.tankType === 'waste') {
+            total += (config.wasteProductionRate / utilization.waste) +
+                     (config.wasteWaterProductionRate / utilization.wasteWater) +
+                     (config.co2ProductionRate / utilization.co2);
+        }
+
+        $scope.mftResults = {};
+
+        if ($scope.tankType === 'both' || $scope.tankType === 'supplies') {
+            $scope.mftResults.food   = round($scope.tankVolume * utilization.food *
+                                        (config.foodConsumptionRate / utilization.food / total), 3);
+            $scope.mftResults.water  = round($scope.tankVolume * utilization.water * 
+                                        (config.waterConsumptionRate / utilization.water / total), 3);
+            $scope.mftResults.oxygen = round($scope.tankVolume * utilization.oxygen *
+                                        (config.oxygenConsumptionRate / utilization.oxygen / total), 1);
+        }
+
+        if ($scope.tankType === 'both' || $scope.tankType === 'waste') {
+            $scope.mftResults.waste      = round($scope.tankVolume * utilization.waste * 
+                                            (config.wasteProductionRate / utilization.waste / total), 3);
+            $scope.mftResults.wasteWater = round($scope.tankVolume * utilization.wasteWater* 
+                                            (config.wasteWaterProductionRate / utilization.wasteWater / total), 3);
+            $scope.mftResults.co2        = round($scope.tankVolume * utilization.co2 * 
+                                            (config.co2ProductionRate / utilization.co2 / total), 1);
+        }
+    };
+
+    function validateTrip() {
         var valid = true;
 
         if ($scope.crewCount === "") {
@@ -429,6 +473,22 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         return valid;
     }
 
+    function validateMFT() {
+        var valid = true;
+
+        if ($scope.tankVolume === "") {
+            $scope.errors.tankVolume = "Please enter a tank volumne.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.tankVolume) || $scope.tankVolume < 1) {
+            $scope.errors.tankVolume = "Please enter a valid number greater than or equal to 1.";
+            valid = false;
+        } else {
+            $scope.errors.tankVolume = "";
+        }
+
+        return valid;
+    }
+
     $scope.getDurationInSeconds = function() {
         var durationYears = parseFloat($scope.durationYears),
             durationDays = parseFloat($scope.durationDays),
@@ -439,6 +499,13 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         return (durationYears * 426 * 21600) + (durationDays * 21600) + (durationHours * 3600) + (durationMinutes * 60) + durationSeconds;
     };
 });
+
+function round(value, decimalPlaces) {
+    decimalPlaces = decimalPlaces || 0;
+    var mult = Math.pow(10, decimalPlaces);
+
+    return Math.round(value * mult) / mult;
+}
 
 function humanizeSeconds(seconds) {
     var years = 0,
