@@ -15,6 +15,10 @@ kspToolsApp.config(['$routeProvider',
                 templateUrl: 'templates/orbit/information.html',
                 controller: 'OrbitInfoCtrl'
             }).
+            when('/orbit/maneuver', {
+                templateUrl : 'templates/orbit/maneuver.html',
+                controller: 'ManeuverPlannerCtrl'
+            }).
             when('/satellite', {
                 templateUrl: 'templates/satellite.html',
                 controller: 'SatelliteCtrl'

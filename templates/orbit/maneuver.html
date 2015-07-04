@@ -1,0 +1,132 @@
+<div class="container">
+    <form class="form-horizontal">
+        <fieldset>
+            <legend>Maneuver Planner</legend>
+            <div class="form-group">
+                <label for="orbitingBody" class="control-label col-sm-3">Orbiting Body</label>
+                <div class="col-sm-3">
+                    <select id="orbitingBody" name="orbitingBody" class="form-control" ng-model="orbitingBody" ng-change="reset()">
+                        <option value="kerbol">Kerbol</option>
+                        <option value="moho">Moho</option>
+                        <option value="eve">Eve</option>
+                        <option value="gilly">&nbsp;&nbsp;&nbsp;&nbsp;Gilly</option>
+                        <option value="kerbin">Kerbin</option>
+                        <option value="mun">&nbsp;&nbsp;&nbsp;&nbsp;Mun</option>
+                        <option value="minmus">&nbsp;&nbsp;&nbsp;&nbsp;Minmus</option>
+                        <option value="duna">Duna</option>
+                        <option value="ike">&nbsp;&nbsp;&nbsp;&nbsp;Ike</option>
+                        <option value="dres">Dres</option>
+                        <option value="jool">Jool</option>
+                        <option value="laythe">&nbsp;&nbsp;&nbsp;&nbsp;Laythe</option>
+                        <option value="vall">&nbsp;&nbsp;&nbsp;&nbsp;Vall</option>
+                        <option value="tylo">&nbsp;&nbsp;&nbsp;&nbsp;Tylo</option>
+                        <option value="bop">&nbsp;&nbsp;&nbsp;&nbsp;Bop</option>
+                        <option value="pol">&nbsp;&nbsp;&nbsp;&nbsp;Pol</option>
+                        <option value="eeloo">Eeloo</option>
+                    </select>
+                </div>
+            </div>
+            <fieldset>
+                <legend>Current Orbit</legend>
+                <div class="form-group" ng-class="{'has-error' : errors.currentApoapsis}">
+                    <label for="currentApoapsis" class="control-label col-sm-3">Apoapsis</label>
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <span class="col-sm-12 help-block" ng-show="errors.currentApoapsis">{{errors.currentApoapsis}}</span>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="currentApoapsis" name="currentApoapsis" ng-model="currentApoapsis" />
+                            </div>
+                    
+                            <div class="col-sm-2">
+                                <select name="currentApoapsisUnits" ng-model="currentApoapsisUnits" class="form-control">
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="Mm">Mm</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error' : errors.currentPeriapsis}">
+                    <label for="currentPeriapsis" class="control-label col-sm-3">Periapsis</label>
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <span class="col-sm-12 help-block" ng-show="errors.currentPeriapsis">{{errors.currentPeriapsis}}</span>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="currentPeriapsis" name="currentPeriapsis" ng-model="currentPeriapsis" />
+                            </div>
+                            <div class="col-sm-2">
+                                <select name="currentPeriapsisUnits" ng-model="currentPeriapsisUnits" class="form-control">
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="Mm">Mm</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Desired Orbit</legend>
+                <div class="form-group" ng-class="{'has-error' : errors.desiredApoapsis}">
+                    <label for="desiredApoapsis" class="control-label col-sm-3">Apoapsis</label>
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <span class="col-sm-12 help-block" ng-show="errors.desiredApoapsis">{{errors.desiredApoapsis}}</span>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="desiredApoapsis" name="desiredApoapsis" ng-model="desiredApoapsis" />
+                            </div>
+                    
+                            <div class="col-sm-2">
+                                <select name="desiredApoapsisUnits" ng-model="desiredApoapsisUnits" class="form-control">
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="Mm">Mm</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" ng-class="{'has-error' : errors.desiredPeriapsis}">
+                    <label for="desiredPeriapsis" class="control-label col-sm-3">Periapsis</label>
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <span class="col-sm-12 help-block" ng-show="errors.desiredPeriapsis">{{errors.desiredPeriapsis}}</span>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="desiredPeriapsis" name="desiredPeriapsis" ng-model="desiredPeriapsis" />
+                            </div>
+                            <div class="col-sm-2">
+                                <select name="desiredPeriapsisUnits" ng-model="desiredPeriapsisUnits" class="form-control">
+                                    <option value="m">m</option>
+                                    <option value="km">km</option>
+                                    <option value="Mm">Mm</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="col-sm-offset-3">
+                <button type="submit" class="btn btn-default" ng-click="calculate()">Calculate</button>
+            </div>
+            <div class="form-group" ng-show="maneuver.first">
+                <label class="col-sm-3 control-label">First Maneuver DeltaV</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{maneuver.first}} m/s</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="maneuver.second">
+                <label class="col-sm-3 control-label">Second Maneuver DeltaV</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{maneuver.second}} m/s</p>
+                </div>
+            </div>
+            <div class="form-group" ng-show="maneuver.total">
+                <label class="col-sm-3 control-label">Total Maneuver DeltaV</label>
+                <div class="col-sm-3">
+                    <p class="form-control-static">{{maneuver.total}} m/s</p>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

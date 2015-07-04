@@ -234,6 +234,111 @@ kspToolsControllers.controller('OrbitInfoCtrl', function ($scope) {
     }
 });
 
+kspToolsControllers.controller('ManeuverPlannerCtrl', function ($scope) {
+    $scope.orbitingBody = 'kerbin';
+    $scope.currentApoapsis = '';
+    $scope.currentPeriapsis = '';
+    $scope.currentApoapsisUnits = 'km';
+    $scope.currentPeriapsisUnits = 'km';
+    $scope.desiredApoapsis = '';
+    $scope.desiredPeriapsis = '';
+    $scope.desiredApoapsisUnits = 'km';
+    $scope.desiredPeriapsisUnits = 'km';
+    $scope.maneuver = {};
+    $scope.errors = {};
+
+    $scope.calculate = function() {
+        if (!validate()) {
+            $scope.maneuver = {};
+            return;
+        }
+
+        var body = bodies[$scope.orbitingBody],
+            currentAp = convertAltitude($scope.currentApoapsis, $scope.currentApoapsisUnits, 'm');
+            currentPe = convertAltitude($scope.currentPeriapsis, $scope.currentPeriapsisUnits, 'm');
+            currentOrbit = new Orbit(body, currentAp, currentPe),
+            desiredAp = convertAltitude($scope.desiredApoapsis, $scope.desiredApoapsisUnits, 'm');
+            desiredPe = convertAltitude($scope.desiredPeriapsis, $scope.desiredPeriapsisUnits, 'm');
+            desiredOrbit = new Orbit(body, desiredAp, desiredPe),
+            intermediateOrbit = new Orbit(body, Math.max(currentPe, desiredAp), Math.min(currentAp, desiredPe));
+
+        if (currentPe !== desiredPe && currentAp !== desiredAp) {
+            $scope.maneuver.first = round(Math.abs(intermediateOrbit.periapsisVelocity - currentOrbit.periapsisVelocity), 2);
+            $scope.maneuver.second = round(Math.abs(desiredOrbit.periapsisVelocity - intermediateOrbit.apoapsisVelocity), 2);
+            $scope.maneuver.total = $scope.maneuver.first + $scope.maneuver.second;
+        } else {
+            $scope.maneuver.first = round(Math.abs(desiredOrbit.periapsisVelocity - currentOrbit.periapsisVelocity), 2);
+            $scope.maneuver.second = 0;
+            $scope.maneuver.total = $scope.maneuver.first;
+        }
+    }
+
+    function validate() {
+        var valid = true;
+        if ($scope.currentApoapsis === "") {
+            $scope.errors.currentApoapsis = "Please enter an apoapsis.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.currentApoapsis)) {
+            $scope.errors.currentApoapsis = "Please enter a valid number greater than or equal to 0.";
+            valid = false;
+        } else {
+            $scope.errors.currentApoapsis = "";
+        }
+
+        if ($scope.currentPeriapsis === "") {
+            $scope.errors.currentPeriapsis = "Please enter a periapsis.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.currentPeriapsis)) {
+            $scope.errors.currentPeriapsis = "Please enter a valid number greater than or equal to 0.";
+            valid = false;
+        } else {
+            $scope.errors.currentPeriapsis = "";
+        }
+
+        if (valid) {
+            var pe = convertAltitude($scope.currentPeriapsis, $scope.currentPeriapsisUnits, 'm'),
+                ap = convertAltitude($scope.currentApoapsis, $scope.currentApoapsisUnits, 'm');
+
+            if (pe > ap) { 
+                $scope.errors.currentPeriapsis = "Please enter a periapsis that is less than or equal to the apoapsis.";
+                valid = false;
+            }
+        }
+
+        if ($scope.desiredApoapsis === "") {
+            $scope.errors.desiredApoapsis = "Please enter an apoapsis.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.desiredApoapsis)) {
+            $scope.errors.desiredApoapsis = "Please enter a valid number greater than or equal to 0.";
+            valid = false;
+        } else {
+            $scope.errors.desiredApoapsis = "";
+        }
+
+        if ($scope.desiredPeriapsis === "") {
+            $scope.errors.desiredPeriapsis = "Please enter a periapsis.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.desiredPeriapsis)) {
+            $scope.errors.desiredPeriapsis = "Please enter a valid number greater than or equal to 0.";
+            valid = false;
+        } else {
+            $scope.errors.desiredPeriapsis = "";
+        }
+
+        if (valid) {
+            var pe = convertAltitude($scope.desiredPeriapsis, $scope.desiredPeriapsisUnits, 'm'),
+                ap = convertAltitude($scope.desiredApoapsis, $scope.desiredApoapsisUnits, 'm');
+
+            if (pe > ap) { 
+                $scope.errors.desiredPeriapsis = "Please enter a periapsis that is less than or equal to the apoapsis.";
+                valid = false;
+            }
+        }
+
+        return valid;
+    }
+});
+
 kspToolsControllers.controller('SatelliteCtrl', function ($scope) {
     $scope.orbitingBody = 'kerbin';
     $scope.apoapsis = '';
@@ -257,9 +362,6 @@ kspToolsControllers.controller('SatelliteCtrl', function ($scope) {
             orbit = new Orbit(body, ap, pe),
             desiredPeriod = (orbit.period * ($scope.satellites - 1)) / $scope.satellites,
             parkingOrbit = Orbit.fromApAndPeriod(body, ap, desiredPeriod);
-
-        console.log(parkingOrbit);
-        console.log(desiredPeriod);
 
         $scope.periapsisCalc = round(convertAltitude(parkingOrbit.periapsis, 'm', $scope.apoapsisUnits), 3);
         $scope.periodCalc = round(parkingOrbit.period, 3);
@@ -408,21 +510,23 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         $scope.mftResults = {};
 
         if ($scope.tankType === 'both' || $scope.tankType === 'supplies') {
-            $scope.mftResults.food   = round($scope.tankVolume * utilization.food *
-                                        (config.foodConsumptionRate / utilization.food / total), 3);
-            $scope.mftResults.water  = round($scope.tankVolume * utilization.water * 
-                                        (config.waterConsumptionRate / utilization.water / total), 3);
-            $scope.mftResults.oxygen = round($scope.tankVolume * utilization.oxygen *
-                                        (config.oxygenConsumptionRate / utilization.oxygen / total), 1);
+            var foodPercentage = round(config.foodConsumptionRate / utilization.food / total, 6),
+                waterPercantage = round(config.waterConsumptionRate / utilization.water / total, 6),
+                oxygenPercentage = round(config.oxygenConsumptionRate / utilization.oxygen / total, 6);
+
+            $scope.mftResults.food   = round($scope.tankVolume * utilization.food * foodPercentage, 3);
+            $scope.mftResults.water  = round($scope.tankVolume * utilization.water * waterPercantage, 3);
+            $scope.mftResults.oxygen = round($scope.tankVolume * utilization.oxygen * oxygenPercentage, 1);
         }
 
         if ($scope.tankType === 'both' || $scope.tankType === 'waste') {
-            $scope.mftResults.waste      = round($scope.tankVolume * utilization.waste * 
-                                            (config.wasteProductionRate / utilization.waste / total), 3);
-            $scope.mftResults.wasteWater = round($scope.tankVolume * utilization.wasteWater* 
-                                            (config.wasteWaterProductionRate / utilization.wasteWater / total), 3);
-            $scope.mftResults.co2        = round($scope.tankVolume * utilization.co2 * 
-                                            (config.co2ProductionRate / utilization.co2 / total), 1);
+            var wastePercentage = round(config.wasteProductionRate / utilization.waste / total, 6),
+                wasteWaterPercentage = round(config.wasteWaterProductionRate / utilization.wasteWater / total, 6),
+                co2Percentage = round(config.co2ProductionRate / utilization.co2 / total, 6);
+
+            $scope.mftResults.waste      = round($scope.tankVolume * utilization.waste * wastePercentage, 3);
+            $scope.mftResults.wasteWater = round($scope.tankVolume * utilization.wasteWater * wasteWaterPercentage, 3);
+            $scope.mftResults.co2        = round($scope.tankVolume * utilization.co2 * co2Percentage, 1);
         }
     };
 
