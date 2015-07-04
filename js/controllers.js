@@ -408,21 +408,23 @@ kspToolsControllers.controller('LifeSupportCtrl', function ($scope) {
         $scope.mftResults = {};
 
         if ($scope.tankType === 'both' || $scope.tankType === 'supplies') {
-            $scope.mftResults.food   = round($scope.tankVolume * utilization.food *
-                                        (config.foodConsumptionRate / utilization.food / total), 3);
-            $scope.mftResults.water  = round($scope.tankVolume * utilization.water * 
-                                        (config.waterConsumptionRate / utilization.water / total), 3);
-            $scope.mftResults.oxygen = round($scope.tankVolume * utilization.oxygen *
-                                        (config.oxygenConsumptionRate / utilization.oxygen / total), 1);
+            var foodPercentage = round(config.foodConsumptionRate / utilization.food / total, 6),
+                waterPercantage = round(config.waterConsumptionRate / utilization.water / total, 6),
+                oxygenPercentage = round(config.oxygenConsumptionRate / utilization.oxygen / total, 6);
+
+            $scope.mftResults.food   = round($scope.tankVolume * utilization.food * foodPercentage, 3);
+            $scope.mftResults.water  = round($scope.tankVolume * utilization.water * waterPercantage, 3);
+            $scope.mftResults.oxygen = round($scope.tankVolume * utilization.oxygen * oxygenPercentage, 1);
         }
 
         if ($scope.tankType === 'both' || $scope.tankType === 'waste') {
-            $scope.mftResults.waste      = round($scope.tankVolume * utilization.waste * 
-                                            (config.wasteProductionRate / utilization.waste / total), 3);
-            $scope.mftResults.wasteWater = round($scope.tankVolume * utilization.wasteWater* 
-                                            (config.wasteWaterProductionRate / utilization.wasteWater / total), 3);
-            $scope.mftResults.co2        = round($scope.tankVolume * utilization.co2 * 
-                                            (config.co2ProductionRate / utilization.co2 / total), 1);
+            var wastePercentage = round(config.wasteProductionRate / utilization.waste / total, 6),
+                wasteWaterPercentage = round(config.wasteWaterProductionRate / utilization.wasteWater / total, 6),
+                co2Percentage = round(config.co2ProductionRate / utilization.co2 / total, 6);
+
+            $scope.mftResults.waste      = round($scope.tankVolume * utilization.waste * wastePercentage, 3);
+            $scope.mftResults.wasteWater = round($scope.tankVolume * utilization.wasteWater * wasteWaterPercentage, 3);
+            $scope.mftResults.co2        = round($scope.tankVolume * utilization.co2 * co2Percentage, 1);
         }
     };
 
