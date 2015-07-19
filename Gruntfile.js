@@ -20,6 +20,12 @@ module.exports = function(grunt) {
                 },
                 {
                     expand: true,
+                    cwd: "bower_components/bootstrap/dist/js/",
+                    src: "bootstrap.min.js",
+                    dest: "vendor/js/"
+                },
+                {
+                    expand: true,
                     cwd: "bower_components/angular/",
                     src: "angular.min.js",
                     dest: "vendor/js/"

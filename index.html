@@ -6,6 +6,7 @@
         <script src="vendor/js/angular-route.min.js"></script>
         <script src="vendor/js/jquery.min.js"></script>
         <script src="vendor/js/lodash.min.js"></script>
+        <script src="vendor/js/bootstrap.min.js"></script>
 
         <script src="js/app.js"></script>
         <script src="js/controllers.js"></script>
@@ -25,7 +26,15 @@
                         <li ng-class="{'active' : isActive('/orbit/darknesstime')}"><a href="#/orbit/darknesstime">Darkness Time</a></li>
                         <li ng-class="{'active' : isActive('/orbit/information')}"><a href="#/orbit/information">Orbit Information</a></li>
                         <li ng-class="{'active' : isActive('/orbit/maneuver')}"><a href="#/orbit/maneuver">Maneuver Planner</a></li>
-                        <li ng-class="{'active' : isActive('/satellite')}"><a href="#/satellite">Satellite Deployment</a></li>
+                        <li ng-class="{'active' : isActive('/satellite'), 'dropdown' : true}">
+                            <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" href="#">
+                                Satellite Deployment <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#/satellite/singlelaunch">Single Launch</a></li>
+                                <li><a href="#/satellite/multiplelaunch">Multiple Launch</a></li>
+                            </ul>
+                        </li>
                         <li ng-class="{'active' : isActive('/lifesupport')}"><a href="#/lifesupport">TAC Life Support</a></li>
                     </ul>
                 </div>

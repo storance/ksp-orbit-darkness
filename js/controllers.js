@@ -1,8 +1,15 @@
 var kspToolsControllers = angular.module('kspToolsControllers', []);
 
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function(searchString, position) {
+        position = position || 0;
+        return this.indexOf(searchString, position) === position;
+    };
+}
+
 kspToolsControllers.controller('HeaderCtrl', function($scope, $location) {
     $scope.isActive = function(path) {
-        return path === $location.path();
+        return $location.path().startsWith(path);
     };
 });
 
@@ -254,11 +261,11 @@ kspToolsControllers.controller('ManeuverPlannerCtrl', function ($scope) {
         }
 
         var body = bodies[$scope.orbitingBody],
-            currentAp = convertAltitude($scope.currentApoapsis, $scope.currentApoapsisUnits, 'm');
-            currentPe = convertAltitude($scope.currentPeriapsis, $scope.currentPeriapsisUnits, 'm');
+            currentAp = convertAltitude($scope.currentApoapsis, $scope.currentApoapsisUnits, 'm'),
+            currentPe = convertAltitude($scope.currentPeriapsis, $scope.currentPeriapsisUnits, 'm'),
             currentOrbit = new Orbit(body, currentAp, currentPe),
-            desiredAp = convertAltitude($scope.desiredApoapsis, $scope.desiredApoapsisUnits, 'm');
-            desiredPe = convertAltitude($scope.desiredPeriapsis, $scope.desiredPeriapsisUnits, 'm');
+            desiredAp = convertAltitude($scope.desiredApoapsis, $scope.desiredApoapsisUnits, 'm'),
+            desiredPe = convertAltitude($scope.desiredPeriapsis, $scope.desiredPeriapsisUnits, 'm'),
             desiredOrbit = new Orbit(body, desiredAp, desiredPe),
             intermediateOrbit = new Orbit(body, Math.max(currentPe, desiredAp), Math.min(currentAp, desiredPe));
 
@@ -271,7 +278,7 @@ kspToolsControllers.controller('ManeuverPlannerCtrl', function ($scope) {
             $scope.maneuver.second = 0;
             $scope.maneuver.total = $scope.maneuver.first;
         }
-    }
+    };
 
     function validate() {
         var valid = true;
@@ -296,10 +303,10 @@ kspToolsControllers.controller('ManeuverPlannerCtrl', function ($scope) {
         }
 
         if (valid) {
-            var pe = convertAltitude($scope.currentPeriapsis, $scope.currentPeriapsisUnits, 'm'),
-                ap = convertAltitude($scope.currentApoapsis, $scope.currentApoapsisUnits, 'm');
+            var pec = convertAltitude($scope.currentPeriapsis, $scope.currentPeriapsisUnits, 'm'),
+                apc = convertAltitude($scope.currentApoapsis, $scope.currentApoapsisUnits, 'm');
 
-            if (pe > ap) { 
+            if (pec > apc) { 
                 $scope.errors.currentPeriapsis = "Please enter a periapsis that is less than or equal to the apoapsis.";
                 valid = false;
             }
@@ -326,10 +333,10 @@ kspToolsControllers.controller('ManeuverPlannerCtrl', function ($scope) {
         }
 
         if (valid) {
-            var pe = convertAltitude($scope.desiredPeriapsis, $scope.desiredPeriapsisUnits, 'm'),
-                ap = convertAltitude($scope.desiredApoapsis, $scope.desiredApoapsisUnits, 'm');
+            var ped = convertAltitude($scope.desiredPeriapsis, $scope.desiredPeriapsisUnits, 'm'),
+                apd = convertAltitude($scope.desiredApoapsis, $scope.desiredApoapsisUnits, 'm');
 
-            if (pe > ap) { 
+            if (ped > apd) { 
                 $scope.errors.desiredPeriapsis = "Please enter a periapsis that is less than or equal to the apoapsis.";
                 valid = false;
             }
@@ -339,7 +346,80 @@ kspToolsControllers.controller('ManeuverPlannerCtrl', function ($scope) {
     }
 });
 
-kspToolsControllers.controller('SatelliteCtrl', function ($scope) {
+kspToolsControllers.controller('MultipleLaunchSatelliteCtrl', function ($scope) {
+    $scope.orbitingBody = 'kerbin';
+    $scope.apoapsis = '';
+    $scope.periapsis = '';
+    $scope.apoapsisUnits = 'km';
+    $scope.periapsisUnits = 'km';
+    $scope.satellites = '';
+    $scope.periapsisCalc = '';
+    $scope.periodCalc = '';
+    $scope.periodHumanized = '';
+    $scope.errors = {};
+
+    $scope.calculate = function() {
+        if (!validate()) {
+            return;
+        }
+
+        var body = bodies[$scope.orbitingBody],
+            ap = convertAltitude($scope.apoapsis, $scope.apoapsisUnits, 'm'),
+            pe = convertAltitude($scope.periapsis, $scope.periapsisUnits, 'm'),
+            orbit = new Orbit(body, ap, pe),
+            angleRadians = (2 * Math.PI) / $scope.satellites,
+            separation = orbit.semiMajorAxis * 2 * Math.sin(angleRadians / 2);
+
+        $scope.separationCalc = round(convertAltitude(separation, 'm', $scope.apoapsisUnits), 3);
+    };
+
+    function validate() {
+        var valid = true;
+        if ($scope.apoapsis === "") {
+            $scope.errors.apoapsis = "Please enter an apoapsis.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.apoapsis)) {
+            $scope.errors.apoapsis = "Please enter a valid number greater than or equal to 0.";
+            valid = false;
+        } else {
+            $scope.errors.apoapsis = "";
+        }
+
+        if ($scope.periapsis === "") {
+            $scope.errors.periapsis = "Please enter a periapsis.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.periapsis)) {
+            $scope.errors.periapsis = "Please enter a valid number greater than or equal to 0.";
+            valid = false;
+        } else {
+            $scope.errors.periapsis = "";
+        }
+
+        if ($scope.satellites === "") {
+            $scope.errors.satellites = "Please enter the number of satellites.";
+            valid = false;
+        } else if (!isPositiveNumber($scope.satellites) || $scope.satellites < 1) {
+            $scope.errors.satellites = "Please enter a valid number greater than or equal to 1.";
+            valid = false;
+        } else {
+            $scope.errors.satellites = "";
+        }
+
+        if (valid) {
+            var pe = convertAltitude($scope.periapsis, $scope.periapsisUnits, 'm'),
+                ap = convertAltitude($scope.apoapsis, $scope.apoapsisUnits, 'm');
+
+            if (pe > ap) { 
+                $scope.errors.periapsis = "Please enter a periapsis that is less than or equal to the apoapsis.";
+                valid = false;
+            }
+        }
+
+        return valid;
+    }
+});
+
+kspToolsControllers.controller('SingleLaunchSatelliteCtrl', function ($scope) {
     $scope.orbitingBody = 'kerbin';
     $scope.apoapsis = '';
     $scope.periapsis = '';

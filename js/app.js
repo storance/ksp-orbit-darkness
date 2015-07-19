@@ -19,9 +19,13 @@ kspToolsApp.config(['$routeProvider',
                 templateUrl : 'templates/orbit/maneuver.html',
                 controller: 'ManeuverPlannerCtrl'
             }).
-            when('/satellite', {
-                templateUrl: 'templates/satellite.html',
-                controller: 'SatelliteCtrl'
+            when('/satellite/singlelaunch', {
+                templateUrl: 'templates/satellite/single-launch.html',
+                controller: 'SingleLaunchSatelliteCtrl'
+            }).
+            when('/satellite/multiplelaunch', {
+                templateUrl: 'templates/satellite/multiple-launch.html',
+                controller: 'MultipleLaunchSatelliteCtrl'
             }).
             when('/lifesupport', {
                 templateUrl: 'templates/lifesupport.html',
